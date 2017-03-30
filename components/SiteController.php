@@ -27,4 +27,9 @@ class SiteController {
         $result = [ "abcde" => "zyx" ];
         return [ 200, $result ];
     }
+
+    public function getError($app, $code) {
+        http_response_code($code);
+	$app->render('error', [ 'code' => $code ]);
+    }
 }

@@ -45,7 +45,9 @@ class Application {
 	public $csrfProtection = true;
 	// default route (keep leading slash)
 	public $defaultRoute = '/site/index';
-	// default layout file (can be change per request)
+	// error route
+	public $errorRoute = '/site/error';
+	// default layout file (can be changed per request)
 	public $layout = 'layout';
 
 	public function __construct() {
@@ -74,29 +76,19 @@ class Application {
 		if (empty($path)) {
 			$path = $this->defaultRoute;
 		}
-		$path = explode('/', $path);
-		// first element is always empty
-		array_shift($path);
-		// build the ClassName
-		$c = array_shift($path);
-		$class_name = ucfirst($c) . 'Controller';
-		// build the methodName
-		$c = array_shift($path);
-		$method_name = strtolower($_SERVER['REQUEST_METHOD']) .
-						( $c ? ucfirst($c) : 'Index' );
-		$call = [ new $class_name, $method_name ];
-
-		// call (new ClassName)->methodName($this, args...);
-		array_unshift($path, $this);
+		list($call, $params) = $this->parseRoute($path); 
 		if (!is_callable($call)) {
-			http_response_code(404);
-			return $this->render('error', [ 'code' => 404 ]);
+			list($call, $params) = $this->parseRoute($this->errorRoute);
+			$params = [ $this, 404 ];	
+		} else {
+			array_unshift($params, $this);
 		}
-		$result = call_user_func_array($call, $path);
+		$result = call_user_func_array($call, $params);
 		if (isset($result[0])) {
 			http_response_code($result[0]);
 		}
 		if (isset($result[1])) {
+			header('Content-Type: application/json');
 			echo json_encode($result[1]);
 		}
 	}
@@ -107,5 +99,19 @@ class Application {
 		include "../views/$viewName.php"; //
 		$body = ob_get_clean();
 		include "../views/{$this->layout}.php";
+	}
+
+	private function parseRoute($path) {
+		$path = explode('/', $path);
+		// first element is always empty
+		array_shift($path);
+		// build the ClassName
+		$c = array_shift($path);
+		$class_name = ucfirst($c) . 'Controller';
+		// build the methodName
+		$c = array_shift($path);
+		$method_name = strtolower($_SERVER['REQUEST_METHOD']) .
+						( $c ? ucfirst($c) : 'Index' );
+		return  [ [ new $class_name, $method_name ], $path ];
 	}
 }
