@@ -30,6 +30,6 @@ class SiteController {
 
     public function getError($app, $code) {
         http_response_code($code);
-	$app->render('error', [ 'code' => $code ]);
+	    $app->render('error', [ 'code' => $code ]);
     }
 }
