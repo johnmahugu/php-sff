@@ -72,8 +72,9 @@ class Application {
 			}
 		}
 		// Route dispatch
-		$path = filter_input(INPUT_SERVER, 'PATH_INFO');
-		if (empty($path)) {
+		$path = filter_input(INPUT_SERVER, 'PATH_INFO'); 
+		if (empty($path)) $path = filter_inpur(INPUT_SERVER, 'REQUEST_URI'); 
+		if (empty($path) || $path == "/") {
 			$path = $this->defaultRoute;
 		}
 		list($call, $params) = $this->parseRoute($path); 
@@ -96,7 +97,7 @@ class Application {
 	public function render($viewName, $args = array()) {
 		ob_start();
 		if (!empty($args)) extract($args); // populate local scope with arg
-		include "../views/$viewName.php"; //
+		include "../views/$viewName.php"; 
 		$body = ob_get_clean();
 		include "../views/{$this->layout}.php";
 	}
@@ -112,6 +113,13 @@ class Application {
 		$c = array_shift($path);
 		$method_name = strtolower($_SERVER['REQUEST_METHOD']) .
 						( $c ? ucfirst($c) : 'Index' );
+
+		if (!class_exists($class_name)) {
+			if ($path != $this->errorRoute)
+				return $this->parseRoute($this->errorRoute);			
+			http_response_code(404);
+			exit();	
+		}
 		return  [ [ new $class_name, $method_name ], $path ];
 	}
 }
