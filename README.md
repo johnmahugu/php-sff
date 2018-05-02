@@ -23,6 +23,12 @@ cd my-project-name
 cd public
 php -S 127.0.0.1:8888 index.php
 ```
+Or start HHVM in server mode
+
+```shell
+cd public
+hhvm -m server -p 8888 -d hhvm.server.error_document404=./index.php -d hhvm.server.fix_path_info=true
+```
 
 3. Browse to http://localhost:8888/
 ```shell
@@ -40,6 +46,6 @@ xdg-open http://localhost:8888/
 Tips
 ====
 
-1. Create new controller as needed, don't put everything on SiteController.php.
+1. Create new controllers as needed, don't put everything on SiteController.php.
 2. You can use subfolders for views and then $app->render('subfolder/view');
 3. You can have multiple layouts and change then inside the action handler, just $app->layout = 'alternative-layout-file';
