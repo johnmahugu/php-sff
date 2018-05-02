@@ -73,7 +73,7 @@ class Application {
 		}
 		// Route dispatch
 		$path = filter_input(INPUT_SERVER, 'PATH_INFO'); 
-		if (empty($path)) $path = filter_inpur(INPUT_SERVER, 'REQUEST_URI'); 
+		if (empty($path)) $path = filter_input(INPUT_SERVER, 'REQUEST_URI'); 
 		if (empty($path) || $path == "/") {
 			$path = $this->defaultRoute;
 		}
@@ -115,10 +115,7 @@ class Application {
 						( $c ? ucfirst($c) : 'Index' );
 
 		if (!class_exists($class_name)) {
-			if ($path != $this->errorRoute)
-				return $this->parseRoute($this->errorRoute);			
-			http_response_code(404);
-			exit();	
+			return false;
 		}
 		return  [ [ new $class_name, $method_name ], $path ];
 	}
